@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Browse Lost & Found</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+<body>
+  <main class="container" style="max-width:1000px; margin:40px auto;">
+    <h2>Lost & Found — Browse reports</h2>
+    <div style="margin:12px 0;">
+      <select id="filterStatus"><option value="">All</option><option>Lost</option><option>Found</option><option>Returned</option></select>
+      <button id="refresh">Refresh</button>
+    </div>
+    <div id="list" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px;"></div>
+  </main>
+
+  <script src="../static/js/lost_found.js"></script>
+  <script>
+    // reuse same loadReports method above by calling it;
+    // the lost_found.js loads automatically when included in the main form page.
+    // For the view page, we must call the loadReports function declared there.
+    // If functions in lost_found.js are not global, you can copy only the fetch/render code.
+    // For simplicity just call loadReports if it's global:
+    if (typeof loadReports === 'function') loadReports();
+    document.getElementById('refresh').addEventListener('click', loadReports);
+    document.getElementById('filterStatus').addEventListener('change', loadReports);
+  </script>
+</body>
+</html>

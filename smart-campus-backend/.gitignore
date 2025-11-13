@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Upload images
+smart-campus-backend/static/uploads/
+
+# VS Code
+.vscode/

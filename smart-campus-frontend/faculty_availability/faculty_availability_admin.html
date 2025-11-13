@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Faculty Availability — Admin</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+  <style>.wrap{max-width:1100px;margin:40px auto;padding:0 18px}.card{background:#fff;padding:20px;border-radius:10px}.btn{background:#12c1b2;color:#022;border:none;padding:8px;border-radius:8px;cursor:pointer}.row{padding:10px 0;border-bottom:1px solid #eef}</style>
+</head>
+<body style="background:linear-gradient(180deg,#082433,#08344f);">
+  <header style="padding:14px 28px;color:#fff;font-weight:700">Faculty Availability — Admin</header>
+  <main class="wrap">
+    <div class="card">
+      <h3>Faculty</h3>
+      <div id="list"></div>
+    </div>
+  </main>
+
+<script>
+  async function load(){
+    const res = await fetch('http://127.0.0.1:5000/list_faculty_availability');
+    const rows = await res.json(); const el=document.getElementById('list'); el.innerHTML='';
+    if(!rows||rows.length===0){ el.innerHTML='<p>No data</p>'; return; }
+    rows.forEach(r=>{
+      const d=document.createElement('div'); d.className='row';
+      d.innerHTML = `<strong>${r.faculty_name}</strong> — ${r.status} <span style="float:right">${r.updated_at||''}</span>`;
+      el.appendChild(d);
+    });
+  }
+  load();
+</script>
+</body>
+</html>

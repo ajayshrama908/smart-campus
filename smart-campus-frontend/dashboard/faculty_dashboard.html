@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Faculty Dashboard | Smart Campus Companion</title>
+
+  <!-- main site CSS (shared) -->
+  <link rel="stylesheet" href="../static/css/style.css" />
+  <style>
+    /* page-specific */
+    :root { --accent-btn: #12c1b2; --card-shadow: 0 12px 28px rgba(2,6,23,0.12); }
+    .topbar { background:#0f93bf; color:#fff; padding:14px 28px; display:flex; justify-content:space-between; align-items:center; }
+    .user-actions { display:flex; gap:12px; align-items:center; }
+    .logout-btn { background:#ff5b67; border:none; color:#fff; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    .container { max-width:1100px; margin:48px auto; padding:0 18px; }
+    h2 { color: #fff; margin: 0 0 6px 0; font-size: 1.8rem; }
+    p.lead { color: rgba(255,255,255,0.75); margin-bottom:18px; }
+
+    .modules { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:22px; }
+    .module-card { background:#fff; padding:20px; border-radius:12px; box-shadow: var(--card-shadow); transition: transform .16s ease; }
+    .module-card:hover { transform: translateY(-6px); }
+    .module-card h3 { color:#0b83a6; display:flex; gap:10px; align-items:center; margin:0 0 8px; font-size:1.05rem; }
+    .module-card p { color:#444; margin:0 0 14px; font-size:0.95rem; line-height:1.4; }
+    .module-card .btn { background:var(--accent-btn); border:none; color:#022; padding:10px 14px; border-radius:8px; cursor:pointer; width:100%; font-weight:600; }
+
+    @media (max-width:720px){
+      .container{ margin:20px 14px; }
+    }
+  </style>
+</head>
+<body style="background:linear-gradient(180deg,#082433 0%, #08344f 100%); min-height:100vh;">
+
+  <header class="topbar">
+    <div style="font-weight:700;font-size:1.18rem">Smart Campus Companion</div>
+    <div class="user-actions">
+      <div id="userDisplay" style="font-weight:600"></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Welcome, Faculty 👨‍🏫</h2>
+    <p class="lead">Select a module to continue — faculty can request bookings; admin approves requests.</p>
+
+    <div class="modules">
+      <div class="module-card">
+        <h3>🏟️ Ground Booking</h3>
+        <p>Request ground bookings (faculty) and view the status of your requests.</p>
+        <button class="btn" onclick="openGroundBooking()">Open Ground Booking</button>
+      </div>
+
+      <div class="module-card">
+        <h3>🏫 Auditorium Booking</h3>
+        <p>Request auditorium use and view auditorium schedules.</p>
+        <button class="btn" onclick="openAuditoriumBooking()">Open Auditorium Booking</button>
+      </div>
+
+      <div class="module-card">
+        <h3>🧑‍🏫 Faculty Availability</h3>
+        <p>Update your availability so students and admins can see your current status.</p>
+        <button class="btn" onclick="openAvailability()">Update Availability</button>
+      </div>
+
+      <div class="module-card">
+        <h3>📋 Lost & Found</h3>
+        <p>Post lost items (with photo), or browse found items to help students locate belongings.</p>
+        <button class="btn" onclick="openLostFound()">Open Lost & Found</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="../static/js/auth.js"></script>
+  <script>
+    // Only faculty & admin allowed (admin can also use faculty pages)
+    requireRole(['faculty','admin']);
+
+    function logout(){
+      localStorage.clear();
+      window.location.href = '/smart-campus-frontend/login.html';
+    }
+    function openGroundBooking(){ window.location.href = '../ground_booking/ground_booking.html'; }
+    function openAuditoriumBooking(){ window.location.href = '../auditorium_booking/auditorium_booking.html'; }
+    function openAvailability(){ window.location.href = '../faculty_availability/faculty_availability.html'; }
+    function openLostFound(){ window.location.href = '../lost_found/lost_found.html'; }
+  </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Campus Companion</title>
+
+  <!-- ===== INLINE STYLES: copy-paste (no external file needed) ===== -->
+  <style>
+    /* basic reset + fonts */
+    :root{
+      --teal:#17d0b1;
+      --deep:#06313a;
+      --card-bg: #ffffff;
+      --muted:#7b9aa0;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif}
+    html,body{height:100%;background:linear-gradient(180deg,#062a36 0%,#003c52 100%);color:var(--deep)}
+    a{color:inherit;text-decoration:none}
+
+    .container{width:92%;max-width:1150px;margin:0 auto}
+
+    /* header */
+    header.site-header{background:rgba(0,0,0,0.38);padding:14px 0;position:sticky;top:0;z-index:60}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{color:#fff;font-weight:700;font-size:18px}
+    nav.top-nav{display:flex;gap:12px;align-items:center}
+    nav.top-nav a{color:#e9fbf6;padding:8px 10px;border-radius:8px}
+    nav.top-nav a:hover{background:rgba(255,255,255,0.04)}
+
+    /* dropdown service */
+    .dropdown{position:relative}
+    .dropbtn{background:transparent;border:0;color:#e9fbf6;padding:8px 10px;cursor:pointer}
+    .dropdown-content{display:none;position:absolute;right:0;top:100%;background:#fff;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.25);min-width:220px;overflow:hidden}
+    .dropdown-content a{display:block;padding:10px 12px;color:var(--deep)}
+    .dropdown:hover .dropdown-content{display:block}
+
+    /* hero */
+    .hero{padding:44px 0 28px}
+    .hero-card{background:linear-gradient(180deg,#ffffff 0,#f6fcfb 100%);padding:34px;border-radius:12px;box-shadow:0 20px 50px rgba(2,18,28,0.45);color:var(--deep)}
+    .hero-card h1{font-size:36px;margin-bottom:6px}
+    .hero-card p.lead{color:var(--muted);margin-bottom:18px}
+    .cta{display:flex;gap:12px}
+
+    /* forms */
+    .register-section{padding:28px 0 50px}
+    .form-card{background:#fff;border-radius:10px;padding:22px;max-width:900px;box-shadow:0 10px 30px rgba(2,18,28,0.08)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .input-group{display:flex;flex-direction:column;gap:6px}
+    label{font-size:13px;color:#15393b}
+    input[type="text"], input[type="email"], input[type="password"], select{
+      padding:11px 12px;border-radius:9px;border:1px solid #e6eef0;font-size:14px;background:#fff;color:#012a2f;
+    }
+    .actions{grid-column:1 / -1;display:flex;gap:12px;align-items:center;padding-top:6px}
+
+    /* buttons */
+    .btn{display:inline-block;padding:10px 18px;border-radius:9px;border:0;cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--teal);color:#033;box-shadow:0 8px 20px rgba(23,208,177,0.16)}
+    .btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .btn:disabled{opacity:.6;cursor:default}
+
+    /* message */
+    .message{margin-top:10px;font-size:14px;min-height:22px;color:#c0392b}
+
+    /* footer */
+    footer.site-footer{padding:18px 0;color:#dff4ee;text-align:center;opacity:0.95;margin-top:8px}
+
+    /* responsive */
+    @media (max-width:900px){
+      .form-grid{grid-template-columns:1fr}
+      .hero-card h1{font-size:28px}
+      .header-inner{flex-direction:column;align-items:flex-start;gap:8px}
+    }
+  </style>
+  <!-- ===== end styles ===== -->
+</head>
+<body>
+  <!-- header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">Smart Campus</div>
+
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="about.html">About</a>
+<!--
+
+        <div class="dropdown" aria-haspopup="true">
+          <button class="dropbtn" aria-expanded="false">Services ▾</button>
+          <div class="dropdown-content" role="menu" aria-hidden="true">
+            <a href="auditorium_booking/auditorium_booking.html" role="menuitem">Auditorium Booking</a>
+            <a href="ground_booking/ground_booking.html" role="menuitem">Ground Booking</a>
+            <a href="lost_found/lost_found.html" role="menuitem">Lost &amp; Found</a>
+            <a href="ground_booking/ground_booking_view.html" role="menuitem">View Bookings</a>
+          </div>
+        </div>
+-->
+
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- hero -->
+  <main class="hero">
+    <div class="container">
+      <div class="hero-card">
+        <h1>Smart Campus Companion</h1>
+        <p class="lead">Digitalize campus tasks — auditorium booking, lost &amp; found, timetables and more.</p>
+
+        <div class="cta">
+          <a class="btn primary" href="#register.html" id="getStarted">Get Started</a>
+          <a class="btn ghost" href="login.html">Login</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- register -->
+  <section id="register" class="register-section">
+    <div class="container">
+      <div class="form-card">
+        <h2>Register</h2>
+
+        <form id="registerForm" class="form-grid" autocomplete="off">
+          <div class="input-group">
+            <label for="name">Full Name</label>
+            <input id="name" name="fullname" type="text" placeholder="Enter your name" required>
+          </div>
+
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="Enter your email" required>
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="Enter your password" required>
+          </div>
+
+          <div class="input-group">
+            <label for="role">Select Role</label>
+            <select id="role" name="role" required>
+              <option value="">-- Choose Role --</option>
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div class="actions">
+            <button id="registerBtn" type="submit" class="btn primary">Register</button>
+            <button id="clearBtn" type="button" class="btn ghost">Clear</button>
+            <p id="registerMessage" class="message" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year"></span> Smart Campus Companion — built for your campus</small>
+    </div>
+  </footer>
+
+  <!-- ===== INLINE JS: registration + small UX ===== -->
+ <!-- replace your existing inline JS with this -->
+<script>
+(function(){
+  const BACKEND = "http://127.0.0.1:5000"; // <-- set your Flask backend origin here
+
+  // set year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // smooth scroll Get Started
+  document.getElementById('getStarted').addEventListener('click', function(e){
+    e.preventDefault();
+    const target = document.querySelector('#register');
+    if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // registration form handling
+  const form = document.getElementById('registerForm');
+  const msg = document.getElementById('registerMessage');
+  const btn = document.getElementById('registerBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  function setMessage(text, ok){
+    msg.style.color = ok ? 'green' : '#c0392b';
+    msg.textContent = text || '';
+  }
+
+  clearBtn.addEventListener('click', function(){ form.reset(); setMessage(''); });
+
+  form.addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    setMessage('');
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('role').value;
+
+    if (!name || !email || !password || !role) { setMessage('Please fill all fields.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Registering...';
+
+    try {
+      // IMPORTANT: point to backend server (not the frontend origin)
+      const url = BACKEND + '/register';
+
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',                // allow cross-origin (Flask CORS must be enabled)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullname: name, email, password, role })
+      });
+
+      // try to parse JSON safely
+      let payload = null;
+      try { payload = await res.json(); } catch (err) { payload = {}; }
+
+      if (res.ok) {
+        setMessage(payload.message || 'Registered successfully — redirecting to login...', true);
+        form.reset();
+        setTimeout(()=> window.location.href = 'login.html', 1200);
+      } else {
+        // Show backend-provided error if available
+        const errText = payload.error || payload.message || ('Server error ' + res.status);
+        setMessage(errText);
+        console.warn('Register failed', res.status, payload);
+      }
+    } catch (err) {
+      console.error('Register error', err);
+      // Helpful message so you see what's wrong
+      setMessage('Network error — is the backend running at ' + BACKEND + '? Check console.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Register';
+    }
+  });
+
+  // make dropdown accessible: toggle aria
+  const dd = document.querySelector('.dropdown');
+  const btnDrop = dd && dd.querySelector('.dropbtn');
+  if (btnDrop) {
+    dd.addEventListener('mouseenter', ()=> { btnDrop.setAttribute('aria-expanded','true'); dd.querySelector('.dropdown-content').setAttribute('aria-hidden','false'); });
+    dd.addEventListener('mouseleave', ()=> { btnDrop.setAttribute('aria-expanded','false'); dd.querySelector('.dropdown-content').setAttribute('aria-hidden','true'); });
+  }
+})();
+</script>
+
+</body>
+</html>

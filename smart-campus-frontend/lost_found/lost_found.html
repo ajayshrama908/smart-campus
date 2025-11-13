@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lost &amp; Found</title>
+
+  <!-- use the CSS file below -->
+  <link rel="stylesheet" href="../static/css/lost_found.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">Smart Campus Companion — Lost &amp; Found</div>
+  </header>
+
+  <main class="container main-grid">
+    <section class="panel">
+      <h2>Report an item</h2>
+      <p class="muted">Students / faculty / admin can post. Add a photo to help identify it.</p>
+
+      <form id="lfForm" enctype="multipart/form-data" novalidate>
+        <input name="item_name" id="item_name" class="field" placeholder="Item name (required)" required>
+        <textarea name="description" id="description" class="field" rows="3" placeholder="Description (optional)"></textarea>
+
+        <label class="small">Status</label>
+        <select name="status" id="status" class="field short">
+          <option>Lost</option>
+          <option>Found</option>
+          <option>Returned</option>
+        </select>
+
+        <label class="small">Image (optional)</label>
+        <input class="field" type="file" name="image" id="image" accept="image/*">
+
+        <div class="row">
+          <button class="btn primary" type="submit">Add Record</button>
+          <button id="refreshList" class="btn" type="button">Refresh</button>
+        </div>
+
+        <div id="lfMessage" class="message" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="list-header">
+        <div>
+          <label class="small muted">Filter</label>
+          <select id="filterStatus" class="field short">
+            <option value="">All</option>
+            <option>Lost</option>
+            <option>Found</option>
+            <option>Returned</option>
+          </select>
+        </div>
+        <div><button id="openAll" class="btn">Open All Images</button></div>
+      </div>
+
+      <div id="noReports" class="muted" style="display:none;margin:12px 0"></div>
+      <div id="reports" class="reports"></div>
+    </section>
+  </main>
+
+  <!-- lost_found.js (below) -->
+  <script src="../static/js/lost_found.js"></script>
+</body>
+
+
+  <style>
+    .lf-wrap { max-width:1100px; margin:40px auto; display:flex; gap:30px; padding:0 18px; }
+    .lf-card { background:#fff; padding:28px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); flex:0 0 48%; }
+    .lf-right { flex:0 0 48%; min-height:260px; }
+    .input, textarea, select { display:block; width:100%; padding:14px; border-radius:10px; border:1px solid #e6eef0; background:#f7fbfd; box-sizing:border-box; margin-bottom:14px; font-size:15px; }
+    .btn { display:inline-block; background:#12c1b2; color:#022; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    .btn-ghost { background:#eef3f3; color:#122; border:0; padding:10px 14px; border-radius:8px; cursor:pointer; margin-left:8px; }
+    .small-muted { color:#6b7280; font-size:14px; margin-bottom:8px; }
+    .message { margin-top:8px; font-weight:600; }
+    #reports { margin-top:18px; display:grid; grid-template-columns:1fr; gap:14px; }
+    .module-card { background:#fff; border-radius:10px; padding:10px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    .thumb { width:120px; height:90px; object-fit:cover; border-radius:8px; background:#e9eef1; }
+    .meta { color:#6b7280; font-size:13px; }
+    .error { color:#c53030; }
+    .success { color:#0f7a56; }
+  </style>
+
+</html>
+

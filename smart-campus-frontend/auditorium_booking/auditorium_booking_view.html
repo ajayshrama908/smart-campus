@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Auditorium Bookings</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div style="font-weight:700;font-size:1.2rem">Smart Campus Companion</div>
+    <div id="userInfo" style="color:#fff; margin-left:auto; padding-right:18px;"></div>
+  </header>
+
+  <main style="max-width:900px; margin:40px auto;">
+    <section class="module-card" style="padding:24px;">
+      <h2>Auditorium Bookings</h2>
+      <p class="small-muted">Students see only approved bookings; faculty/admin see their bookings or all (admin).</p>
+
+      <div style="display:flex; gap:12px; align-items:center; margin-top:12px;">
+        <select id="statusSelect" style="padding:10px;border-radius:8px;">
+          <option value="All">All</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <button id="refreshBtn" class="btn" style="width:120px;">Refresh</button>
+      </div>
+
+      <div id="bookingsList" style="margin-top:18px; color:#0b3a66;">
+        Loading...
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const BACKEND_BASE = 'http://127.0.0.1:5000'; // change if backend runs elsewhere
+
+    (function(){
+      const role = (localStorage.getItem('role')||'').toLowerCase();
+      const user_id = localStorage.getItem('user_id');
+      const info = document.getElementById('userInfo');
+      if(info) info.textContent = (localStorage.getItem('user_name') || '') + (role ? (' ('+role+')') : '');
+
+      const statusSelect = document.getElementById('statusSelect');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const listDiv = document.getElementById('bookingsList');
+
+      if(role === 'student'){
+        statusSelect.value = 'Approved';
+        statusSelect.disabled = true;
+      }
+
+      async function loadBookings(){
+        listDiv.textContent = 'Loading...';
+        const params = new URLSearchParams();
+        params.set('role', role || 'student');
+        if(role === 'faculty' && user_id) params.set('user_id', user_id);
+        const status = statusSelect.value || 'All';
+        params.set('status', status);
+        try {
+          const res = await fetch(BACKEND_BASE + '/get_auditorium_bookings?' + params.toString());
+          if(!res.ok){
+            listDiv.textContent = `Server error: ${res.status}`;
+            return;
+          }
+          const rows = await res.json();
+          if(!Array.isArray(rows) || rows.length === 0){
+            listDiv.innerHTML = '<div>No bookings</div>';
+            return;
+          }
+
+          listDiv.innerHTML = rows.map(r => {
+            const date = r.date || '';
+            const st = r.start_time || '';
+            const et = r.end_time || '';
+            const en = escapeHtml(r.event_name || 'Event');
+            const requester = escapeHtml(r.requester_name || 'Unknown');
+            const status = r.status || '';
+            return `
+              <div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;color:#073147;">
+                <div style="font-weight:700">${en}</div>
+                <div style="margin-top:6px">${requester} • ${date} ${st} - ${et}</div>
+                <div style="margin-top:8px">Status: <strong>${status}</strong></div>
+              </div>
+            `;
+          }).join('');
+        } catch (err){
+          console.error(err);
+          listDiv.textContent = 'Unable to load bookings (see console).';
+        }
+      }
+
+      refreshBtn.addEventListener('click', loadBookings);
+      statusSelect.addEventListener('change', loadBookings);
+      loadBookings();
+
+      function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+    })();
+  </script>
+</body>
+</html>

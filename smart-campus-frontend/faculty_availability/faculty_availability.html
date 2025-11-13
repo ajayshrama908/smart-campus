@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Faculty Availability | Smart Campus</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+  <style>
+    .card { background:#fff;padding:28px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.06); }
+    table { width:100%; border-collapse:collapse; margin-top:18px; }
+    th, td { padding:12px;border-bottom:1px solid #eef4f8; text-align:left; }
+    .badge-available { background:#16a34a;color:#fff;padding:8px 12px;border-radius:20px; font-weight:700; }
+    .badge-busy { background:#f97316;color:#fff;padding:8px 12px;border-radius:20px; font-weight:700; }
+    .badge-leave { background:#f59e0b;color:#fff;padding:8px 12px;border-radius:20px; font-weight:700; }
+    .controls { display:flex; gap:10px; align-items:center; }
+    .update-btn { background:#06b6d4;padding:10px 14px;border-radius:8px;border:none;color:#022;font-weight:700; }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="container"><div class="brand">Smart Campus Companion</div></div>
+  </header>
+
+  <main class="container" style="padding:40px;">
+    <div class="card">
+      <h2>Faculty Availability</h2>
+      <p>Update your availability — table below shows latest for all faculty.</p>
+
+      <div style="margin-top:12px;" class="controls">
+        <label>Update Your Availability:
+          <select id="myStatus" style="margin-left:8px;padding:8px;border-radius:8px;">
+            <option value="Available">Available</option>
+            <option value="Busy">Busy</option>
+            <option value="On Leave">On Leave</option>
+          </select>
+        </label>
+        <button class="update-btn" id="updateBtn">Update</button>
+        <button style="margin-left:auto;padding:8px 12px;border-radius:8px;background:#e6eef3;border:none;" id="refresh">Refresh</button>
+      </div>
+
+      <div id="tableWrap"></div>
+    </div>
+  </main>
+
+  <script>
+    async function loadList(){
+      const res = await fetch('http://127.0.0.1:5000/list_faculty_availability');
+      const rows = await res.json();
+      const wrap = document.getElementById('tableWrap');
+      if(!Array.isArray(rows)){ wrap.innerHTML = '<div style="color:red">Error</div>'; return; }
+      if(rows.length===0){ wrap.innerHTML = '<div>No records</div>'; return; }
+      let html = '<table><thead><tr><th>Faculty Name</th><th>Status</th><th>Last Updated</th></tr></thead><tbody>';
+      for(const r of rows){
+        let badge = '<span class="badge-available">Available</span>';
+        if(r.status === 'Busy') badge = '<span class="badge-busy">Busy</span>';
+        if(r.status === 'On Leave') badge = '<span class="badge-leave">On Leave</span>';
+        html += `<tr><td>${r.faculty_name}</td><td>${badge}</td><td>${r.updated_at}</td></tr>`;
+      }
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    }
+
+    document.getElementById('refresh').addEventListener('click', loadList);
+
+    document.getElementById('updateBtn').addEventListener('click', async ()=>{
+      const status = document.getElementById('myStatus').value;
+      const name = localStorage.getItem('user_name') || 'Unknown';
+      try {
+        const res = await fetch('http://127.0.0.1:5000/update_faculty_availability', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ faculty_name: name, status })
+        });
+        const data = await res.json();
+        if(res.ok) { alert('✅ ' + data.message); loadList(); }
+        else { alert('✖ ' + (data.error||data.message)); }
+      } catch(err){ alert('Server error'); }
+    });
+
+    // initial load
+    loadList();
+  </script>
+</body>
+</html>

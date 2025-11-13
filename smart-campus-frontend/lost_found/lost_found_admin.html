@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Lost & Found — Admin</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+  <style>.wrap{max-width:1100px;margin:40px auto;padding:0 18px}.card{background:#fff;padding:20px;border-radius:10px}.item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #eef}.thumb{width:120px;height:90px;background:#e9eef0;border-radius:8px;object-fit:cover}.btn{background:#12c1b2;color:#022;border:none;padding:8px;border-radius:8px;cursor:pointer}</style>
+</head>
+<body style="background:linear-gradient(180deg,#082433,#08344f);">
+  <header style="padding:14px 28px;color:#fff;font-weight:700">Lost & Found — Admin</header>
+  <main class="wrap">
+    <div class="card">
+      <h3>Reports</h3>
+      <div id="list"></div>
+    </div>
+  </main>
+
+  <script>
+    async function load(){
+      const res = await fetch('http://127.0.0.1:5000/get_lost_items');
+      const rows = await res.json(); const el=document.getElementById('list'); el.innerHTML='';
+      if(!rows||rows.length===0){ el.innerHTML='<p>No reports</p>'; return; }
+      rows.forEach(r=>{
+        const d=document.createElement('div'); d.className='item';
+        const img = document.createElement('img'); img.className='thumb'; img.src = r.image_url || '../static/img/placeholder.png';
+        img.onerror = ()=> img.src = '../static/img/placeholder.png';
+        const body = document.createElement('div'); body.style.flex='1';
+        body.innerHTML = `<strong>${r.item_name}</strong><div class="muted">${r.description||''}</div>
+          <div style="margin-top:8px"><button class="btn" onclick="mark(${r.item_id},'Found')">Mark Found</button>
+          <button class="btn" style="margin-left:8px" onclick="mark(${r.item_id},'Returned')">Mark Returned</button></div>`;
+        d.appendChild(img); d.appendChild(body);
+        el.appendChild(d);
+      });
+    }
+    async function mark(id,status){
+      await fetch('http://127.0.0.1:5000/update_lost_status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({item_id:id,status})});
+      load();
+    }
+    load();
+  </script>
+</body>
+</html>

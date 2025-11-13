@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ground Bookings | Smart Campus</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .list-card { max-width:960px; margin:44px auto; padding:28px; border-radius:12px; background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+    .filter-row { display:flex; gap:12px; align-items:center; margin-bottom:18px; flex-wrap:wrap; }
+    select, button { padding:10px 12px; border-radius:8px; border:1px solid #ddd; }
+    .refresh { background:#20d0b7; color:#fff; border:none; padding:10px 18px; cursor:pointer; border-radius:8px; }
+    .booking-item { padding:16px; border-radius:10px; border:1px solid #eee; margin-bottom:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; background:#fbfbfb; }
+    .booking-left { flex:1; }
+    .booking-actions button { margin-left:8px; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    .approve { background:#0a7; color:#fff; border:none; }
+    .reject { background:#d33; color:#fff; border:none; }
+    .small { font-size:13px; color:#666; }
+    .server-msg { color:#d23; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="container">
+      <div class="brand">Smart Campus Companion</div>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../auditorium_booking/auditorium_booking.html">Auditorium</a>
+        <a href="ground_booking.html">Request Booking</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="list-card">
+      <h2>Bookings</h2>
+      <p class="small">See current ground bookings. Students see only approved bookings; faculty/admin see more.</p>
+
+      <div class="filter-row">
+        <label>Role
+          <select id="roleSelect">
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+
+        <label>Status
+          <select id="statusSelect">
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </label>
+
+        <button id="refreshBtn" class="refresh">Refresh</button>
+      </div>
+
+      <div id="serverMsg" class="server-msg"></div>
+      <div id="bookingsList" style="margin-top:12px;"></div>
+    </div>
+  </main>
+
+  <script src="../js/ground_booking_view.js"></script>
+</body>
+</html>

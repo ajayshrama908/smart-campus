@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Ground Booking - Admin</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+  <style>
+    .card { max-width:1100px; margin:36px auto; padding:20px; background:#fff; border-radius:12px; }
+    .controls { display:flex; gap:12px; align-items:center; margin-bottom:18px; }
+    .list { display:grid; gap:12px; }
+    .item { background:#f8fafb; padding:16px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; }
+    .item .meta { color:#123; }
+    .btn { padding:8px 12px; border-radius:8px; cursor:pointer; }
+    .approve { background:#13a085; color:#fff; border:none; }
+    .reject { background:#f55; color:#fff; border:none; }
+  </style>
+</head>
+<body>
+  <header class="nav"><div class="container brand">Smart Campus Companion</div></header>
+
+  <main class="container card">
+    <h2>Pending ground booking requests</h2>
+
+    <div class="controls">
+      <select id="statusFilter">
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+        <option value="">All</option>
+      </select>
+      <button id="refresh" class="btn">Refresh</button>
+    </div>
+
+    <div id="list" class="list"></div>
+    <p id="adminMsg" style="margin-top:12px;color:#0b3a66;font-weight:600"></p>
+  </main>
+
+  <script src="../static/js/ground_booking_admin.js"></script>
+</body>
+</html>

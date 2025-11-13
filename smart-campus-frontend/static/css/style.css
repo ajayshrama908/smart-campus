@@ -1,0 +1,428 @@
+/* ensure inputs/select text is visible on dark theme */
+input, textarea, select, option, button {
+  color: #022; /* dark text for inputs */
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* placeholder color */
+input::placeholder, textarea::placeholder { color: #a8bccb; }
+
+/* select option text visibility */
+select option { color: #022; }
+
+/* module card base */
+.module-card { transition: transform .18s ease, box-shadow .18s ease; }
+.module-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.45); }
+
+/* buttons */
+.btn { background: var(--accent, #12c1b2); color: #022; border-radius: 10px; padding: 12px 18px; border:none; cursor:pointer; font-weight:600; }
+
+/* messages */
+.msg { margin-top:12px; font-weight:600; display:block; }
+
+
+
+input, textarea, select, option, button { color: #0b3a66 !important; }
+input::placeholder, textarea::placeholder { color: rgba(11,58,102,0.45) !important; }
+
+
+:root {
+  --bg1:#0f1724;
+  --bg2:#0b3a66;
+  --accent:#2dd4bf;
+  --muted:rgba(255,255,255,0.8);
+  --glass:rgba(255,255,255,0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation */
+.nav {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 16px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+.nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+.brand {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 20px;
+  transition: color 0.2s ease;
+}
+.nav-links a:hover {
+  color: var(--accent);
+}
+
+/* Hero Section */
+.hero {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+.hero-card {
+  background: var(--glass);
+  padding: 40px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  text-align: left;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  animation: fadeIn 0.7s ease;
+}
+.hero-card h1 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+.hero-card p {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+label {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input, select {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+input:focus, select:focus {
+  background: rgba(255, 255, 255, 0.2);
+  outline: 2px solid var(--accent);
+}
+
+/* Button */
+.btn {
+  background: var(--accent);
+  color: #022;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  width: 100%;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(45, 212, 191, 0.3);
+}
+
+/* Message */
+.msg {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 18px 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(5px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .hero-card {
+    padding: 28px;
+  }
+  .hero-card h1 {
+    font-size: 1.4rem;
+  }
+}
+
+/* ---------- INPUT + SELECT VISIBILITY FIXES (paste into style.css) ---------- */
+
+/* make text inside inputs/selects/textarea visible on light backgrounds */
+input, textarea, select, .search input, .form input, .form select, .form textarea {
+  color: #0b3a66 !important;           /* main readable color */
+  background: #ffffff !important;      /* white background for inputs */
+  border: 1px solid #e6eef0;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: none;
+}
+
+/* placeholder color */
+input::placeholder, textarea::placeholder {
+  color: #9fb2bf !important;
+  opacity: 1;
+}
+
+/* focus state: ensure color remains visible on focus */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #33c6b8;
+  -webkit-text-fill-color: #0b3a66 !important; /* Chrome autofill safe */
+  color: #0b3a66 !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+
+/* select option text */
+select, select option {
+  color: #0b3a66 !important;
+  background: #fff !important;
+}
+
+/* small table text contrast */
+table td.small { color: #334155 !important; }
+
+/* Chrome autofill fix (important) */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0b3a66 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ensure search / nav inputs also show text */
+.nav .nav-links input,
+.search input {
+  color: #0b3a66 !important;
+}
+
+/* ensure text in buttons remains readable */
+button, .btn {
+  color: #022 !important;
+}
+
+/* optional: if you want transparent/ghost fields but readable text, uncomment */
+/*
+input.ghost, textarea.ghost {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+*/
+/* ---------------------------- Make dashboard text visible ---------------------------- */
+/* Add at the *end* of your style.css so it overrides earlier rules */
+
+/* global readable default for content areas */
+.main, main, .container, .modules, .module-card, .hero-card, body {
+  color: #073147 !important;      /* dark blue for body text */
+}
+
+/* header / navbar - ensure white text on dark header */
+header, .navbar, .nav {
+  color: #ffffff !important;
+}
+.nav .brand, .navbar .brand, .brand {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+/* nav links */
+.nav-links a, .navbar .nav-links a, .nav a {
+  color: rgba(255,255,255,0.95) !important;
+}
+
+/* module cards (white background) - force readable text */
+.module-card, .card, .hero-card {
+  color: #0b3a66 !important;
+  background: #ffffff !important;
+}
+
+/* titles inside cards */
+.module-card h3, .card h3, .hero-card h1, .hero-card h2 {
+  color: #0077b6 !important;
+  font-weight: 700;
+}
+
+/* paragraphs in cards / descriptions */
+.module-card p, .card p, .hero-card p, main p {
+  color: #123845 !important;
+  opacity: 0.95;
+}
+
+/* Inputs, selects, placeholders, textarea */
+input, textarea, select {
+  color: #0b3a66 !important;
+  background: #ffffff !important;
+  border-color: #e6eef0 !important;
+}
+input::placeholder, textarea::placeholder {
+  color: #9fb2bf !important;
+  opacity: 1;
+}
+select option {
+  color: #0b3a66 !important;
+  background: #fff !important;
+}
+
+/* Make sure focused inputs keep visible color (Chrome autofill safe) */
+input:focus, textarea:focus, select:focus {
+  -webkit-text-fill-color: #0b3a66 !important;
+  color: #0b3a66 !important;
+}
+
+/* Chrome autofill override */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0b3a66 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* table rows/cells */
+table, table td, table th {
+  color: #0b3a66 !important;
+}
+
+/* small contrast text */
+.small, td.small, .muted {
+  color: #3b5562 !important;
+}
+
+/* Button text contrast */
+button, .btn, .update-btn {
+  color: #022 !important;
+}
+
+/* ensure .nav-actions / user display is visible on header */
+#userDisplay, .nav-actions {
+  color: #fff !important;
+}
+
+/* Fix any accidental white-on-white in selects inside cards */
+.module-card select, .card select {
+  background: #fff !important;
+  color: #0b3a66 !important;
+}
+
+/* Debug helper (temporary): highlight elements missing color */
+/* Uncomment to visually find invisible items while debugging */
+/*
+* {
+  outline: 0.5px dashed rgba(0,0,0,0.04);
+}
+*/
+/* ground booking view quick styles */
+.book-grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); }
+.booking { background:#fff; border-radius:10px; padding:14px; box-shadow: 0 10px 30px rgba(2,6,23,0.08); }
+.status { font-weight:700; padding:6px 10px; border-radius:8px; }
+.status.approved { background:#e6fbf6; color:#007a57; }
+.status.pending { background:#fff7e6; color:#9a6a00; }
+.status.rejected { background:#ffe8e8; color:#a11; }
+
+
+
+/* Reset-ish (small) */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+html,body { height:100%; background: linear-gradient(180deg,#0f2b3a 0%, #0c3a54 100%); color: #0b2b31; }
+
+/* Containers */
+.container { width: 92%; max-width: 1100px; margin: 0 auto; }
+
+/* Header / nav */
+.nav { background: rgba(0,0,0,0.45); color: #fff; padding: 12px 0; position: sticky; top: 0; z-index: 40; }
+.nav-inner { display:flex; align-items:center; justify-content:space-between; }
+.brand { font-weight:700; font-size:18px; color:#fff; margin-left:6px; }
+.nav-links { display:flex; gap:12px; align-items:center; }
+.nav-links a { color:#e6f6f0; text-decoration:none; padding:8px 10px; border-radius:6px; }
+.nav-links a:hover { background: rgba(255,255,255,0.05); }
+
+/* dropdown */
+.dropdown { position: relative; display:inline-block; }
+.dropbtn { background: transparent; color:#e6f6f0; border: none; padding: 8px 10px; cursor: pointer; font-size: 14px; }
+.dropdown-content { display:none; position:absolute; background:#fff; min-width:200px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); border-radius:6px; right:0; z-index: 50; }
+.dropdown-content a { color:#0b2b31; padding:10px 12px; display:block; text-decoration:none; }
+.dropdown-content a:hover { background:#f1f6f5; }
+.dropdown:hover .dropdown-content { display:block; }
+
+/* Hero */
+.hero { padding: 48px 0 36px; }
+.hero-card { background: linear-gradient(180deg,#fff 0%, #f7fbfb 100%); padding: 36px; border-radius: 12px; box-shadow: 0 18px 40px rgba(2,18,28,0.35); color:#033; }
+.hero-card h1 { font-size: 34px; margin-bottom:10px; color:#023442; }
+.hero-card .lead { margin: 10px 0 20px; color:#0b3b3f; }
+.cta { display:flex; gap:12px; margin-top:10px; }
+
+/* Forms / cards */
+.register-section { padding: 32px 0 60px; }
+.form-card { background: #fff; border-radius: 10px; padding: 20px; max-width: 820px; box-shadow: 0 10px 30px rgba(2,18,28,0.08); margin-top: 18px; }
+.form-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:end; }
+.input-group { display:flex; flex-direction:column; gap:6px; }
+.input-group label { font-size:14px; color:#0b3b3f; }
+.input-group input, .input-group select { padding:10px 12px; border-radius:8px; border:1px solid #e6eef0; font-size:14px; background:#fff; color:#033; }
+.actions { display:flex; gap:12px; justify-content:flex-start; align-items:center; margin-top:6px; }
+
+/* Buttons */
+.btn { display:inline-block; padding:10px 18px; border-radius:8px; cursor:pointer; border:none; font-weight:600; }
+.primary { background: #17d0b1; color:#043; box-shadow: 0 6px 16px rgba(23,208,177,0.18); }
+.primary:disabled { opacity:0.6; cursor:default; }
+.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.18); }
+
+/* message */
+.message { margin-top:12px; font-size:14px; color:#c0392b; min-height:22px; }
+
+/* small screens */
+@media (max-width:880px) {
+  .nav-inner { flex-direction:column; align-items:flex-start; gap:8px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .hero-card h1 { font-size: 26px; }
+}
+
+/* Footer */
+.footer { padding:18px 0; color:#dff7f0; text-align:center; opacity:0.9; }
+
+/* ground booking card shared look */
+.booking-card, .list-card { background: #ffffff; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
+.btn-primary { background: #20d0b7; color: #063; border-radius: 8px; padding: 12px 18px; border: none; font-weight:700; display:inline-block; }
+.small { font-size: 0.9rem; color:#666; }
+
+/* appended minimal lost & found styles */
+.module-card { background:#ffffff; border-radius:10px; padding:10px; display:flex; gap:12px; align-items:flex-start; }
+.thumb { width:120px; height:90px; object-fit:cover; border-radius:8px; background:#e9eef1; }
+.small-muted { color:#6b7280; font-size:14px; }
+.message.error { color:#c53030; font-weight:600; margin-top:8px; }
+.message.success { color:#0f7a56; font-weight:600; margin-top:8px; }
+.input { border-radius:10px; padding:12px; border:1px solid #e6eef0; background:#f7fbfd; }
+.btn { background:#12c1b2; color:#022; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; }
+.btn-ghost { background:#eef3f3; color:#122; border:0; padding:10px 12px; border-radius:8px; cursor:pointer; }

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Request Auditorium Booking</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div style="font-weight:700;font-size:1.2rem">Smart Campus Companion</div>
+    <div id="userInfo" style="color:#fff; margin-left:auto; padding-right:18px;"></div>
+  </header>
+
+  <main style="max-width:900px; margin:40px auto;">
+    <section class="module-card" style="padding:36px;">
+      <h2>Request Auditorium Booking</h2>
+      <p>Faculty only — requests will be <strong>Pending</strong> until an admin approves.</p>
+
+      <div style="margin-top:18px;">
+        <label>Event name</label>
+        <input id="eventName" placeholder="e.g. Guest Lecture" />
+      </div>
+
+      <div style="margin-top:12px;">
+        <label>Date</label>
+        <input id="evDate" type="date" />
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:12px;">
+        <div style="flex:1;">
+          <label>Start time</label>
+          <input id="startTime" type="time" />
+        </div>
+        <div style="flex:1;">
+          <label>End time</label>
+          <input id="endTime" type="time" />
+        </div>
+      </div>
+
+      <div style="margin-top:18px;">
+        <button id="requestBtn" class="btn">Request Booking</button>
+      </div>
+
+      <p id="msg" class="msg" style="color:#0b3a66; margin-top:12px;"></p>
+    </section>
+  </main>
+
+  <script>
+    const BACKEND_BASE = 'http://127.0.0.1:5000'; // change if backend runs elsewhere
+
+    (function(){
+      const role = (localStorage.getItem('role')||'').toLowerCase();
+      const name = localStorage.getItem('user_name') || '';
+      const userInfo = document.getElementById('userInfo');
+      if(userInfo) userInfo.textContent = name + (role ? (' ('+role+')') : '');
+      if(!['faculty','admin'].includes(role)){
+        document.getElementById('msg').textContent = 'Only faculty (or admin) may request bookings.';
+        document.getElementById('requestBtn').disabled = true;
+        return;
+      }
+
+      document.getElementById('requestBtn').addEventListener('click', async () => {
+        const event_name = document.getElementById('eventName').value.trim();
+        const date = document.getElementById('evDate').value;
+        const start_time = document.getElementById('startTime').value;
+        const end_time = document.getElementById('endTime').value;
+        const user_id = localStorage.getItem('user_id');
+
+        const msg = document.getElementById('msg');
+        msg.style.color = '#0b3a66';
+
+        if(!event_name || !date || !start_time || !end_time){
+          msg.textContent = 'Please fill all fields.';
+          return;
+        }
+
+        const payload = { user_id, event_name, date, start_time, end_time };
+
+        try {
+          const res = await fetch(BACKEND_BASE + '/book_auditorium', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(payload)
+          });
+          const j = await res.json();
+          if(res.ok){
+            msg.style.color = 'green';
+            msg.textContent = j.message || 'Requested. Pending approval.';
+            document.getElementById('eventName').value = '';
+            document.getElementById('evDate').value = '';
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+          } else {
+            msg.style.color = '#b00020';
+            msg.textContent = j.error || j.message || `Server: ${res.status}`;
+          }
+        } catch (err){
+          console.error(err);
+          msg.style.color = '#b00020';
+          msg.textContent = 'Unable to send request. Check backend.';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

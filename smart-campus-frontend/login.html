@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Campus - Login</title>
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <div class="brand">🏫 Smart Campus</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
+        <a href="about.html">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-card">
+      <h1>Welcome Back 👋</h1>
+      <p>Login to access your Smart Campus dashboard.</p>
+
+      <form id="loginForm" class="form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required />
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required />
+        </div>
+
+        <button type="submit" class="btn">Login</button>
+        <p id="loginMessage" class="msg"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2025 Smart Campus | All rights reserved.</p>
+  </footer>
+
+  <script src="static/js/login.js"></script>
+</body>
+</html>

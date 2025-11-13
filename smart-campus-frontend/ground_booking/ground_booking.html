@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ground Booking</title>
+  <link rel="stylesheet" href="../static/css/ground_booking.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand">Smart Campus Companion</div>
+    </header>
+
+    <main class="container">
+      <section class="left card">
+        <h2>Request Ground Booking</h2>
+        <p class="hint">Only faculty should request bookings. Students view approved bookings.</p>
+
+        <!-- role selector for demo only (replace with auth in your app) -->
+        <div class="row">
+          <label>Role</label>
+          <select id="roleSelect">
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div id="facultyForm">
+          <label>Event name</label>
+          <input id="eventName" type="text" placeholder="e.g. Intercollege Cricket Match">
+
+          <div class="row">
+            <div>
+              <label>Date</label>
+              <input id="eventDate" type="date">
+            </div>
+            <div>
+              <label>Start</label>
+              <input id="startTime" type="time">
+            </div>
+            <div>
+              <label>End</label>
+              <input id="endTime" type="time">
+            </div>
+          </div>
+
+          <button id="requestBtn" class="btn primary">Request Booking</button>
+        </div>
+
+        <div id="info" class="info"></div>
+      </section>
+
+      <section class="right card">
+        <div class="filter-row">
+          <label>Status</label>
+          <select id="statusFilter">
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <button id="refreshBtn" class="btn">Refresh</button>
+        </div>
+
+        <div id="bookingsList" class="list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../static/js/ground_booking.js"></script>
+</body>
+</html>
