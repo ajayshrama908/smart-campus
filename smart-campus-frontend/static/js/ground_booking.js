@@ -1,164 +1,223 @@
-// simple frontend for ground booking
+// ground_booking.js
+// Final cleaned version for your project.
+// Works with backend expecting: event_name, date, start_time, end_time
+
 const BACKEND = "http://127.0.0.1:5000";
 
-function qs(id){ return document.getElementById(id); }
+(function () {
+  const role = (localStorage.getItem("role") || "student").toLowerCase();
+  const user_id = localStorage.getItem("user_id") || "";
+  const user_name = localStorage.getItem("user_name") || "";
 
-async function fetchBookings(role, user_id, status) {
-  const u = new URL(BACKEND + "/get_ground_bookings");
-  u.searchParams.set("role", role);
-  if (user_id) u.searchParams.set("user_id", user_id);
-  if (status) u.searchParams.set("status", status);
-  const r = await fetch(u);
-  if (!r.ok) throw new Error("Failed to fetch bookings");
-  return r.json();
-}
+  const requestPanel = document.getElementById("facultyForm");
+  const infoEl = document.getElementById("info");
+  const bookingsList = document.getElementById("bookingsList");
+  const statusFilter = document.getElementById("statusFilter");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const requestBtn = document.getElementById("requestBtn");
 
-function renderBooking(b, role){
-  const item = document.createElement('div');
-  item.className = 'item';
+  // -------------------------------
+  // ROLE-BASED UI
+  // -------------------------------
+  function applyRoleUI() {
+    if (role === "faculty" || role === "admin") {
+      requestPanel.style.display = "";
+      infoEl.textContent = "";
+    } else {
+      requestPanel.style.display = "none";
+      infoEl.style.color = "#b00020";
+      infoEl.textContent =
+        "Viewing as student — only approved bookings are visible.";
+    }
+  }
+  applyRoleUI();
 
-  const dateBox = document.createElement('div');
-  dateBox.style.width = '90px';
-  dateBox.style.textAlign = 'center';
-  dateBox.innerHTML = `<div style="font-weight:700">${b.date}</div><div class="small-muted">${b.start_time}–${b.end_time}</div>`;
-  item.appendChild(dateBox);
-
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.innerHTML = `<div class="title">${escapeHtml(b.event_name)}</div>
-    <div class="small-muted">Posted by: ${escapeHtml(b.requester_name || 'Unknown')} • ${escapeHtml(b.status || '')}</div>`;
-  item.appendChild(meta);
-
-  const controls = document.createElement('div');
-  controls.className = 'controls';
-
-  // Admin: approve/reject for pending items
-  if (role === 'admin' && b.status === 'Pending') {
-    const a = document.createElement('button');
-    a.className = 'btn';
-    a.textContent = 'Approve';
-    a.onclick = () => updateStatus(b.id, 'Approved');
-    const rj = document.createElement('button');
-    rj.className = 'btn';
-    rj.textContent = 'Reject';
-    rj.style.background = '#ffd'; rj.onclick = () => updateStatus(b.id, 'Rejected');
-    controls.appendChild(a);
-    controls.appendChild(rj);
+  // -------------------------------
+  // HELPERS
+  // -------------------------------
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, (c) => {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c];
+    });
   }
 
-  item.appendChild(controls);
-  return item;
-}
+  async function fetchBookings(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    const url = `${BACKEND}/get_ground_bookings?${qs}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Server " + res.status);
+    return await res.json();
+  }
 
-function escapeHtml(s) {
-  return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-async function loadList(){
-  const role = qs('roleSelect').value;
-  // demo user_id: in real app use actual logged user id
-  const user_id = localStorage.getItem('user_id') || (role === 'faculty' ? '2' : '');
-  const status = qs('statusFilter').value;
-  const container = qs('bookingsList');
-  container.innerHTML = 'Loading...';
-
-  try {
-    const rows = await fetchBookings(role, user_id, status === 'All' ? undefined : status);
+  function renderBookings(rows, opts = {}) {
     if (!rows || rows.length === 0) {
-      container.innerHTML = '<div class="small-muted">No bookings found.</div>';
+      bookingsList.innerHTML = `<div class="muted">No bookings</div>`;
       return;
     }
-    container.innerHTML = '';
-    rows.forEach(r => {
-      // ensure id property name consistent: some DB returns 'id', others 'ID' — normalize
-      if (!r.id && r.id !== 0 && r.hasOwnProperty('booking_id')) r.id = r.booking_id;
-      container.appendChild(renderBooking(r, role));
-    });
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = `<div class="small-muted">Unable to load bookings: ${err.message}</div>`;
-  }
-}
 
-async function updateStatus(booking_id, status){
-  try {
-    const res = await fetch(BACKEND + '/update_ground_booking_status', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({booking_id, status})
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed');
-    loadList();
-  } catch (err) {
-    alert('Error updating status: ' + err.message);
-  }
-}
+    bookingsList.innerHTML = rows
+      .map((r) => {
+        const id = r.id || r.booking_id;
+        const title = escapeHtml(r.event_name);
+        const date = escapeHtml(r.date);
+        const st = escapeHtml(r.start_time);
+        const et = escapeHtml(r.end_time);
+        const posted = escapeHtml(r.requester_name || "Unknown");
+        const status = escapeHtml(r.status);
 
-async function requestBooking(){
-  const role = qs('roleSelect').value;
-  if (role !== 'faculty') {
-    qs('info').textContent = 'You must be logged in as faculty to request bookings.';
-    qs('info').style.color = '#b43030';
-    return;
-  }
-  const event_name = qs('eventName').value.trim();
-  const date = qs('eventDate').value;
-  const start_time = qs('startTime').value;
-  const end_time = qs('endTime').value;
+        let actions = "";
 
-  if (!event_name || !date || !start_time || !end_time) {
-    qs('info').textContent = 'Please fill all fields.';
-    qs('info').style.color = '#b43030';
-    return;
+        if (opts.canApprove && status === "Pending") {
+          actions = `
+            <button class="action-btn approve" data-id="${id}">Approve</button>
+            <button class="action-btn action-ghost reject" data-id="${id}">Reject</button>
+          `;
+        } else if (opts.canCancel && status === "Pending") {
+          actions = `
+            <button class="action-btn action-ghost cancel" data-id="${id}">Cancel</button>
+          `;
+        }
+
+        return `
+          <div class="booking">
+            <div style="font-weight:700">${title}</div>
+            <div class="meta">• ${date} ${st} - ${et} • Posted by: ${posted} • ${status}</div>
+            ${actions ? `<div style="margin-top:8px">${actions}</div>` : ""}
+          </div>
+        `;
+      })
+      .join("");
   }
 
-  // demo user_id (replace with real user id)
-  const user_id = localStorage.getItem('user_id') || '2';
+  // -------------------------------
+  // LOAD BOOKINGS
+  // -------------------------------
+  async function loadBookings() {
+    bookingsList.innerHTML = `<div class="muted">Loading...</div>`;
 
-  const payload = { user_id, event_name, date, start_time, end_time };
+    let filter = statusFilter.value === "All" ? "" : statusFilter.value;
 
-  try {
-    qs('requestBtn').disabled = true;
-    qs('requestBtn').textContent = 'Requesting...';
-    const res = await fetch(BACKEND + '/book_ground', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      // conflict response 409 contains conflicts array
-      qs('info').textContent = data.error || 'Server error';
-      qs('info').style.color = '#b43030';
-      return;
+    try {
+      if (role === "student") {
+        const rows = await fetchBookings({
+          role: "student",
+          status: "Approved",
+        });
+        renderBookings(rows, {});
+        return;
+      }
+
+      if (role === "faculty") {
+        const rows = await fetchBookings({
+          role: "faculty",
+          status: filter,
+          user_id,
+        });
+        renderBookings(rows, { canCancel: true });
+        return;
+      }
+
+      if (role === "admin") {
+        const rows = await fetchBookings({ role: "admin", status: filter });
+        renderBookings(rows, { canApprove: true });
+      }
+    } catch (err) {
+      console.error(err);
+      bookingsList.innerHTML = `<div class="muted">Unable to load bookings</div>`;
     }
-    qs('info').textContent = data.message || 'Requested';
-    qs('info').style.color = '#106f3a';
-    // clear fields (optionally)
-    qs('eventName').value = ''; qs('startTime').value = ''; qs('endTime').value = ''; // keep date maybe
-    loadList();
-  } catch (err) {
-    qs('info').textContent = 'Network error — check backend at ' + BACKEND;
-    qs('info').style.color = '#b43030';
-  } finally {
-    qs('requestBtn').disabled = false;
-    qs('requestBtn').textContent = 'Request Booking';
   }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  qs('refreshBtn').addEventListener('click', loadList);
-  qs('statusFilter').addEventListener('change', loadList);
-  qs('requestBtn').addEventListener('click', requestBooking);
-  qs('roleSelect').addEventListener('change', e => {
-    const role = e.target.value;
-    // show/hide the form (demo)
-    qs('facultyForm').style.display = role === 'faculty' ? 'block' : 'none';
-    loadList();
+  loadBookings();
+
+  // -------------------------------
+  // REQUEST BOOKING (Faculty)
+  // -------------------------------
+  if (requestBtn) {
+    requestBtn.addEventListener("click", async () => {
+      const event_name = document.getElementById("eventName").value.trim();
+      const date = document.getElementById("eventDate").value;
+      const start_time = document.getElementById("startTime").value;
+      const end_time = document.getElementById("endTime").value;
+
+      if (!event_name || !date || !start_time || !end_time) {
+        infoEl.style.color = "#b00020";
+        infoEl.textContent = "Missing fields";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BACKEND}/book_ground`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id,
+            event_name,
+            date,
+            start_time,
+            end_time,
+          }),
+        });
+
+        const j = await res.json();
+
+        if (res.ok) {
+          infoEl.style.color = "green";
+          infoEl.textContent = j.message || "Requested";
+          document.getElementById("eventName").value = "";
+          document.getElementById("eventDate").value = "";
+          document.getElementById("startTime").value = "";
+          document.getElementById("endTime").value = "";
+          loadBookings();
+        } else {
+          infoEl.style.color = "#b00020";
+          infoEl.textContent = j.error || j.message || "Error";
+        }
+      } catch (err) {
+        console.error(err);
+        infoEl.style.color = "#b00020";
+        infoEl.textContent = "Network error";
+      }
+    });
+  }
+
+  // -------------------------------
+  // APPROVE / REJECT / CANCEL
+  // -------------------------------
+  bookingsList.addEventListener("click", async (e) => {
+    const id = e.target.dataset.id;
+    if (!id) return;
+
+    if (e.target.classList.contains("approve")) {
+      if (confirm("Approve this booking?"))
+        await updateStatus(id, "Approved");
+    }
+    if (e.target.classList.contains("reject")) {
+      if (confirm("Reject this booking?")) await updateStatus(id, "Rejected");
+    }
+    if (e.target.classList.contains("cancel")) {
+      if (confirm("Cancel your request?"))
+        await updateStatus(id, "Rejected");
+    }
   });
 
-  // initialize: hide form when not faculty
-  qs('facultyForm').style.display = qs('roleSelect').value === 'faculty' ? 'block' : 'none';
-  loadList();
-});
+  async function updateStatus(id, status) {
+    const res = await fetch(`${BACKEND}/update_ground_booking_status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ booking_id: id, status }),
+    });
+
+    if (!res.ok) alert("Error updating booking");
+
+    loadBookings();
+  }
+
+  if (refreshBtn) refreshBtn.addEventListener("click", loadBookings);
+  if (statusFilter) statusFilter.addEventListener("change", loadBookings);
+})();

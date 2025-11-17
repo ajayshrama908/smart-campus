@@ -17,15 +17,20 @@
         <h2>Request Ground Booking</h2>
         <p class="hint">Only faculty should request bookings. Students view approved bookings.</p>
 
-        <!-- role selector for demo only (replace with auth in your app) -->
-        <div class="row">
+        <!-- role selector for demo only (replace with auth ) -->
+        <!--<div class="row">
           <label>Role</label>
           <select id="roleSelect">
             <option value="student">Student</option>
             <option value="faculty">Faculty</option>
             <option value="admin">Admin</option>
           </select>
-        </div>
+        </div>-->
+
+          <script src="../static/js/auth.js"></script>
+  <script>
+    requireRole(['student','faculty','admin']);
+  </script>
 
         <div id="facultyForm">
           <label>Event name</label>

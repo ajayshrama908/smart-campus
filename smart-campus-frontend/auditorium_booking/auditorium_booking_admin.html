@@ -4,7 +4,21 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin — Auditorium Requests</title>
+
   <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/auditorium_booking_view.css">
+  <style>
+    /* small admin-specific tweaks */
+    .two-sections { display:flex; gap:18px; align-items:flex-start; }
+    .section { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); color: #073147; }
+    .section h3 { margin:0 0 8px 0; font-size:18px; color:#073245; }
+    .section .list { display:flex; flex-direction:column; gap:12px; max-height:380px; overflow:auto; padding-right:6px; }
+    .small-muted { color:#6b7780; font-size:14px; margin-top:6px; }
+    .action-btn { background:#12c1b2; color:#002b2a; padding:8px 10px; border-radius:8px; border:none; font-weight:700; cursor:pointer; }
+    .secondary-btn { background:#eef3f3; color:#073147; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
+    .controls { display:flex; gap:10px; align-items:center; justify-content:flex-start; margin-bottom:10px; }
+    @media (max-width: 980px) { .two-sections { flex-direction:column; } .section{ width:100% } }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -12,93 +26,152 @@
     <div id="userInfo" style="color:#fff; margin-left:auto; padding-right:18px;"></div>
   </header>
 
-  <main style="max-width:1000px; margin:40px auto;">
-    <section class="module-card" style="padding:24px;">
-      <h2>Pending Auditorium Requests</h2>
-      <div style="margin-top:12px;">
-        <button id="refreshBtn" class="btn">Refresh</button>
+  <main class="page-wrap">
+    <div class="card" style="grid-template-columns: 1fr;"> <!-- make card single-column to place content inside -->
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:16px;">
+        <div>
+          <div class="title">Pending Auditorium Requests</div>
+          <div class="note">Admin: approve or reject pending requests. Approved requests are listed to the right.</div>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button id="refreshBtn" class="btn">Refresh</button>
+        </div>
       </div>
 
-      <div id="requests" style="margin-top:18px; color:#073147;">
-        Loading...
+      <!-- content area: two sections side-by-side -->
+      <div style="margin-top:18px;" class="two-sections">
+        <!-- Pending -->
+        <div class="section" style="flex:1;">
+          <h3>Pending</h3>
+          <div id="pendingList" class="list">
+            <div style="color:#6b7780">Loading pending requests...</div>
+          </div>
+        </div>
+
+        <!-- Approved (read-only) -->
+        <div class="section" style="width:360px;">
+          <h3>Approved</h3>
+          <div id="approvedList" class="list">
+            <div style="color:#6b7780">Loading approved bookings...</div>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   </main>
 
-  <script>
-    const BACKEND_BASE = 'http://127.0.0.1:5000'; // change if backend runs elsewhere
+<script>
+  const BACKEND_BASE = 'http://127.0.0.1:5000';
 
-    (function(){
-      const info = document.getElementById('userInfo');
-      if(info) info.textContent = localStorage.getItem('user_name') || '';
+  (function(){
+    const info = document.getElementById('userInfo');
+    if(info) info.textContent = localStorage.getItem('user_name') || '';
 
-      const requests = document.getElementById('requests');
-      const refreshBtn = document.getElementById('refreshBtn');
+    const pendingList = document.getElementById('pendingList');
+    const approvedList = document.getElementById('approvedList');
+    const refreshBtn = document.getElementById('refreshBtn');
 
-      async function loadPending(){
-        requests.textContent = 'Loading...';
-        try {
-          const res = await fetch(BACKEND_BASE + '/get_auditorium_bookings?role=admin&status=Pending');
-          if(!res.ok){ requests.textContent = `Server: ${res.status}`; return; }
-          const rows = await res.json();
-          if(!rows || rows.length === 0){
-            requests.innerHTML = '<div>No pending requests</div>';
-            return;
-          }
-          requests.innerHTML = rows.map(r => {
-            const date = r.date || '';
-            const st = r.start_time || '';
-            const et = r.end_time || '';
-            const en = escapeHtml(r.event_name || 'Event');
-            const requester = escapeHtml(r.requester_name || 'Unknown');
-            return `
-              <div style="background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;color:#073147;">
-                <div style="font-weight:700">${en}</div>
-                <div style="margin-top:6px">${requester} • ${date} ${st} - ${et}</div>
-                <div style="margin-top:8px;">
-                  <button class="approveBtn" data-id="${r.id}" style="margin-right:8px;">Approve</button>
-                  <button class="rejectBtn" data-id="${r.id}">Reject</button>
-                </div>
-              </div>
-            `;
-          }).join('');
-          document.querySelectorAll('.approveBtn').forEach(b=>{
-            b.addEventListener('click', () => updateStatus(b.dataset.id, 'Approved'));
-          });
-          document.querySelectorAll('.rejectBtn').forEach(b=>{
-            b.addEventListener('click', () => updateStatus(b.dataset.id, 'Rejected'));
-          });
-        } catch (err){
-          console.error(err);
-          requests.textContent = 'Unable to load requests (check console).';
+    async function loadPending(){
+      pendingList.innerHTML = '<div style="color:#6b7780">Loading pending requests...</div>';
+      try {
+        const res = await fetch(BACKEND_BASE + '/get_auditorium_bookings?role=admin&status=Pending');
+        if(!res.ok){ pendingList.innerHTML = `<div style="color:#b00020">Server: ${res.status}</div>`; return; }
+        const rows = await res.json();
+        if(!rows || rows.length===0){
+          pendingList.innerHTML = '<div style="color:#6b7780">No pending requests</div>';
+          return;
         }
+        pendingList.innerHTML = rows.map(r => renderPendingItem(r)).join('');
+        // attach listeners
+        document.querySelectorAll('.approveBtn').forEach(b => b.addEventListener('click', onApprove));
+        document.querySelectorAll('.rejectBtn').forEach(b => b.addEventListener('click', onReject));
+      } catch(err){
+        console.error(err);
+        pendingList.innerHTML = '<div style="color:#b00020">Unable to load pending (see console)</div>';
       }
+    }
 
-      async function updateStatus(id, status){
-        try {
-          const res = await fetch(BACKEND_BASE + '/update_auditorium_booking_status', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ booking_id: id, status })
-          });
-          const j = await res.json();
-          if(res.ok){
-            alert(j.message || 'Updated');
-            loadPending();
-          } else {
-            alert(j.error || j.message || `Server ${res.status}`);
-          }
-        } catch (err){
-          console.error(err);
-          alert('Unable to update (see console).');
+    async function loadApproved(){
+      approvedList.innerHTML = '<div style="color:#6b7780">Loading approved bookings...</div>';
+      try {
+        const res = await fetch(BACKEND_BASE + '/get_auditorium_bookings?role=admin&status=Approved');
+        if(!res.ok){ approvedList.innerHTML = `<div style="color:#b00020">Server: ${res.status}</div>`; return; }
+        const rows = await res.json();
+        if(!rows || rows.length===0){
+          approvedList.innerHTML = '<div style="color:#6b7780">No approved bookings</div>';
+          return;
         }
+        approvedList.innerHTML = rows.map(r => renderApprovedItem(r)).join('');
+      } catch(err){
+        console.error(err);
+        approvedList.innerHTML = '<div style="color:#b00020">Unable to load approved (see console)</div>';
       }
+    }
 
-      refreshBtn.addEventListener('click', loadPending);
-      loadPending();
+    function renderPendingItem(r){
+      const en = escapeHtml(r.event_name || 'Event');
+      const requester = escapeHtml(r.requester_name || 'Unknown');
+      const date = escapeHtml(r.date || '');
+      const st = escapeHtml(r.start_time || '');
+      const et = escapeHtml(r.end_time || '');
+      const id = r.id || r.booking_id || '';
+      return `
+        <div style="background:#fff;border-radius:8px;padding:10px;">
+          <div style="font-weight:700">${en}</div>
+          <div style="margin-top:6px;color:#6b7780;font-size:13px">${requester} • ${date} ${st} - ${et}</div>
+          <div style="margin-top:8px;">
+            <button class="action-btn approveBtn" data-id="${id}" style="margin-right:8px;">Approve</button>
+            <button class="secondary-btn rejectBtn" data-id="${id}">Reject</button>
+          </div>
+        </div>
+      `;
+    }
 
-      function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-    })();
-  </script>
+    function renderApprovedItem(r){
+      const en = escapeHtml(r.event_name || 'Event');
+      const requester = escapeHtml(r.requester_name || 'Unknown');
+      const date = escapeHtml(r.date || '');
+      const st = escapeHtml(r.start_time || '');
+      const et = escapeHtml(r.end_time || '');
+      return `
+        <div style="background:#fff;border-radius:8px;padding:10px;">
+          <div style="font-weight:700">${en}</div>
+          <div style="margin-top:6px;color:#6b7780;font-size:13px">${requester} • ${date} ${st} - ${et}</div>
+          <div style="margin-top:8px;color:#073147;font-weight:700">Status: Approved</div>
+        </div>
+      `;
+    }
+
+    async function updateStatus(id, status){
+      try {
+        const res = await fetch(BACKEND_BASE + '/update_auditorium_booking_status', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ booking_id: id, status })
+        });
+        const j = await res.json();
+        if(res.ok){
+          // refresh both lists
+          await Promise.all([loadPending(), loadApproved()]);
+        } else {
+          alert(j.error || j.message || `Server ${res.status}`);
+        }
+      } catch (err){
+        console.error(err);
+        alert('Unable to update (see console)');
+      }
+    }
+
+    function onApprove(e){ const id = e.currentTarget.dataset.id; updateStatus(id, 'Approved'); }
+    function onReject(e){ const id = e.currentTarget.dataset.id; updateStatus(id, 'Rejected'); }
+
+    refreshBtn.addEventListener('click', ()=>{ loadPending(); loadApproved(); });
+    // initial load
+    loadPending();
+    loadApproved();
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+  })();
+</script>
 </body>
 </html>

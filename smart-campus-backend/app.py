@@ -17,8 +17,6 @@ app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
 
 
-
-# at top
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -36,7 +34,7 @@ def get_db_connection():
 #     return mysql.connector.connect(
 #         host="localhost",
 #         user="root",
-#         password="Akash@93",
+#         password="",
 #         database="smartcampus"
 #     )
 
@@ -115,10 +113,6 @@ def login():
 
 
 # ---------- helper: serialize datetimes / times / timedeltas ----------
-# --- put near other booking endpoints in app.py ---
-# -------------------- Ground booking backend (copy into app.py) --------------------
-# --- ground booking endpoints & helpers ---
-# ---------- Ground booking endpoints (replace/add in app.py) ----------
 # ---------- Ground booking endpoints ----------
 from datetime import datetime, date, time as pytime, timedelta
 
@@ -307,20 +301,10 @@ def get_ground_bookings():
 
 # ----------------------------------------------------------------------------------
 
-
-
-# ---------- Lost & Found and other endpoints (keep your existing) ----------
-# For brevity I'm not repeating them here; keep your existing lost_found endpoints
-# (they looked fine in your earlier code aside from upload handling which you already corrected).
-
-
-
 # ---------------------------
 # Lost & Found endpoints (file upload)
 # ---------------------------
-# ---------------------------
-# Lost & Found endpoints (multipart upload supported)
-# ---------------------------
+
 @app.route("/add_lost_item", methods=["POST"])
 def add_lost_item():
     """
@@ -399,7 +383,6 @@ def get_lost_items():
     cur.close()
     conn.close()
 
-    # build absolute image URL using request.host_url (includes scheme+host+port)
     # e.g. http://127.0.0.1:5000/static/uploads/1638123_myfile.jpg
     base = request.host_url.rstrip('/')  # e.g. http://127.0.0.1:5000
     for r in rows:
@@ -428,7 +411,7 @@ def update_lost_status():
     return jsonify({"message": "Status updated"})
 
 
-# ---------- Auditorium booking endpoints (replace/add in app.py) ----------
+# ---------- Auditorium booking endpoint----------
 #from datetime import datetime, date, time as pytime
 
 from datetime import datetime, date, time as pytime, timedelta
@@ -601,21 +584,40 @@ def update_auditorium_booking_status():
     conn.close()
     return jsonify({"message": "Auditorium booking status updated"})
 
+
+
 # ---------------------------
-# Faculty availability
+# Faculty availability (secure)
 # ---------------------------
 @app.route("/update_availability", methods=["POST"])
 def update_availability():
-    data = request.get_json()
+    data = request.get_json() or {}
     faculty_name = data.get("faculty_name")
     new_status = data.get("status")
 
+    # basic validation
     if not faculty_name or not new_status:
         return jsonify({"error": "Missing data"}), 400
+
+    # ---------- server-side role + identity check ----------
+    # Read role/name from headers (frontend must send these)
+    requester_role = (request.headers.get("X-User-Role") or "").lower()
+    requester_name = request.headers.get("X-User-Name") or ""
+
+    # Only faculty may update availability
+    if requester_role != "faculty":
+        return jsonify({"error": "Only faculty may update availability"}), 403
+
+    # Faculty may only update their own availability (prevent changing others)
+    # compare names exactly (you can adjust normalization if needed)
+    if requester_name != faculty_name:
+        return jsonify({"error": "You may update only your own availability"}), 403
 
     try:
         conn = get_db_connection()
         cur = conn.cursor(dictionary=True)
+
+        # upsert behavior: update if exists else insert
         cur.execute("SELECT id FROM faculty_availability WHERE faculty_name = %s", (faculty_name,))
         existing = cur.fetchone()
 
@@ -633,12 +635,20 @@ def update_availability():
         conn.commit()
         cur.close()
         conn.close()
-        return jsonify({"message": "✅ Availability updated successfully!"})
+        return jsonify({"message": "✅ Availability updated successfully!"}), 200
+
     except Exception as e:
         print("Error in update_availability:", e)
         return jsonify({"error": "Database error"}), 500
 
 
+# alias kept for compatibility
+@app.route("/update_faculty_availability", methods=["POST"])
+def update_faculty_availability():
+    return update_availability()
+
+
+# read-only endpoints unchanged
 @app.route("/get_availability", methods=["GET"])
 def get_availability():
     faculty_name = request.args.get("faculty_name")
@@ -655,12 +665,6 @@ def get_availability():
         return jsonify({"status": "Available"})
 
 
-@app.route("/update_faculty_availability", methods=["POST"])
-def update_faculty_availability():
-    # compatibility alias
-    return update_availability()
-
-
 @app.route("/list_faculty_availability", methods=["GET"])
 def list_faculty_availability():
     conn = get_db_connection()
@@ -670,6 +674,7 @@ def list_faculty_availability():
     cur.close()
     conn.close()
     return jsonify(rows)
+
 
 
 # ---------------------------

@@ -13,6 +13,8 @@
     .badge-leave { background:#f59e0b;color:#fff;padding:8px 12px;border-radius:20px; font-weight:700; }
     .controls { display:flex; gap:10px; align-items:center; }
     .update-btn { background:#06b6d4;padding:10px 14px;border-radius:8px;border:none;color:#022;font-weight:700; }
+    .muted { color:#6b7780; }
+    .error { color:#b00020; }
   </style>
 </head>
 <body>
@@ -38,41 +40,116 @@
       </div>
 
       <div id="tableWrap"></div>
+      <div id="statusMessage" style="margin-top:12px"></div>
     </div>
   </main>
 
   <script>
-    async function loadList(){
-      const res = await fetch('http://127.0.0.1:5000/list_faculty_availability');
-      const rows = await res.json();
-      const wrap = document.getElementById('tableWrap');
-      if(!Array.isArray(rows)){ wrap.innerHTML = '<div style="color:red">Error</div>'; return; }
-      if(rows.length===0){ wrap.innerHTML = '<div>No records</div>'; return; }
-      let html = '<table><thead><tr><th>Faculty Name</th><th>Status</th><th>Last Updated</th></tr></thead><tbody>';
-      for(const r of rows){
-        let badge = '<span class="badge-available">Available</span>';
-        if(r.status === 'Busy') badge = '<span class="badge-busy">Busy</span>';
-        if(r.status === 'On Leave') badge = '<span class="badge-leave">On Leave</span>';
-        html += `<tr><td>${r.faculty_name}</td><td>${badge}</td><td>${r.updated_at}</td></tr>`;
-      }
-      html += '</tbody></table>';
-      wrap.innerHTML = html;
+    // Backend base URL
+    const BACKEND = 'http://127.0.0.1:5000';
+
+    // Elements
+    const tableWrap = document.getElementById('tableWrap');
+    const refreshBtn = document.getElementById('refresh');
+    const updateBtn = document.getElementById('updateBtn');
+    const myStatus = document.getElementById('myStatus');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // helper to show messages
+    function showMessage(msg, isError=false) {
+      statusMessage.textContent = msg;
+      statusMessage.className = isError ? 'error' : 'muted';
     }
 
-    document.getElementById('refresh').addEventListener('click', loadList);
-
-    document.getElementById('updateBtn').addEventListener('click', async ()=>{
-      const status = document.getElementById('myStatus').value;
-      const name = localStorage.getItem('user_name') || 'Unknown';
+    async function loadList(){
       try {
-        const res = await fetch('http://127.0.0.1:5000/update_faculty_availability', {
-          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ faculty_name: name, status })
+        const res = await fetch(BACKEND + '/list_faculty_availability');
+        if(!res.ok) throw new Error('Server ' + res.status);
+        const rows = await res.json();
+        if(!Array.isArray(rows)) { tableWrap.innerHTML = '<div style="color:red">Error</div>'; return; }
+        if(rows.length===0){ tableWrap.innerHTML = '<div>No records</div>'; return; }
+
+        let html = '<table><thead><tr><th>Faculty Name</th><th>Status</th><th>Last Updated</th></tr></thead><tbody>';
+        for(const r of rows){
+          let badge = '<span class="badge-available">Available</span>';
+          if(r.status === 'Busy') badge = '<span class="badge-busy">Busy</span>';
+          if(r.status === 'On Leave') badge = '<span class="badge-leave">On Leave</span>';
+
+          const updated = r.updated_at || r.updatedAt || '';
+          const safeName = String(r.faculty_name || r.name || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          html += `<tr><td>${safeName}</td><td>${badge}</td><td>${updated}</td></tr>`;
+        }
+        html += '</tbody></table>';
+        tableWrap.innerHTML = html;
+      } catch(err) {
+        console.error(err);
+        tableWrap.innerHTML = '<div style="color:#b00020">Unable to load availability (see console)</div>';
+      }
+    }
+
+    // UPDATED fetch: sends X-User-Role and X-User-Name in headers
+    async function updateAvailability() {
+      statusMessage.textContent = '';
+      const status = myStatus.value;
+
+      // Get identity from localStorage (set at login)
+      const role = (localStorage.getItem('role') || '').toLowerCase();
+      const name = localStorage.getItem('user_name') || '';
+
+      // Basic client-side check (UI privacy). Server enforces final check.
+      if(role !== 'faculty') {
+        showMessage('Only faculty may update availability.', true);
+        return;
+      }
+      if(!name) {
+        showMessage('User not identified. Please login.', true);
+        return;
+      }
+
+      // Build payload
+      const payload = { faculty_name: name, status };
+
+      try {
+        const res = await fetch(BACKEND + '/update_faculty_availability', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // === important headers the backend will read ===
+            'X-User-Role': role,
+            'X-User-Name': name
+          },
+          body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if(res.ok) { alert('✅ ' + data.message); loadList(); }
-        else { alert('✖ ' + (data.error||data.message)); }
-      } catch(err){ alert('Server error'); }
-    });
+
+        const data = await res.json().catch(()=>({}));
+        if(res.ok) {
+          showMessage(data.message || 'Availability updated.');
+          loadList();
+        } else {
+          // server returns 403 or 400 with message
+          showMessage(data.error || data.message || ('Server: ' + res.status), true);
+        }
+      } catch(err) {
+        console.error(err);
+        showMessage('Network error — check backend.', true);
+      }
+    }
+
+    // wire events
+    refreshBtn.addEventListener('click', loadList);
+    updateBtn.addEventListener('click', updateAvailability);
+
+    // on load: hide update UI when not faculty (optional)
+    (function initRoleUI(){
+      const role = (localStorage.getItem('role') || '').toLowerCase();
+      if(role !== 'faculty') {
+        // disable update button and show message
+        updateBtn.disabled = true;
+        showMessage('Viewing as non-faculty — updates are disabled.');
+      } else {
+        updateBtn.disabled = false;
+      }
+    })();
 
     // initial load
     loadList();

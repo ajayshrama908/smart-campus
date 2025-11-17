@@ -32,6 +32,7 @@ function requireRole(allowed = []) {
   const name = localStorage.getItem('user_name') || '';
   const userEl = document.getElementById('userDisplay');
   if (userEl) userEl.textContent = name ? `${name} (${role})` : role;
+
 }
 
 // static/js/auth.js

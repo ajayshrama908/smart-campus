@@ -2,9 +2,21 @@
 from werkzeug.security import generate_password_hash
 import mysql.connector
 
+# def get_db_connection():
+#     return mysql.connector.connect(
+#         host="localhost", user="root", password="", database="smartcampus"
+#     )
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost", user="root", password="Akash@93", database="smartcampus"
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASS"),
+        database=os.getenv("DB_NAME", "smartcampus"),
     )
 
 def main():

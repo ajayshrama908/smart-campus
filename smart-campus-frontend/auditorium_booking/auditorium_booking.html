@@ -4,7 +4,58 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Request Auditorium Booking</title>
+
+  <!-- global + page styles -->
   <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/auditorium_booking.css">
+  <link rel="stylesheet" href="../static/css/auditorium_booking_view.css">
+  <link rel="stylesheet" href="../static/css/ground_booking.css">
+  <style>
+/* FORCE stacked layout — high specificity + !important to override earlier rules */
+.card {
+  display: block !important;
+  max-width: 1100px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+/* center the white form and keep it above lists */
+.module-card {
+  display: flex !important;
+  max-width: 780px !important;
+  margin: 36px auto 18px !important;
+  z-index: 2 !important;
+  position: relative !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.14) !important;
+}
+
+/* lists area sits below the form and centered */
+.lists-column {
+  display: block !important;
+  max-width: 1100px !important;
+  margin: 18px auto 48px !important;
+  padding: 0 6px !important;
+  clear: both !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ensure lists-inner is side-by-side only on wide screens */
+.lists-inner { display:flex !important; gap:18px !important; align-items:flex-start !important; }
+.lists-inner .section.approved { flex: 0 0 360px !important; }
+.lists-inner .section { flex: 1 !important; }
+
+/* safety: remove any floating or absolute positioning inside form */
+.module-card * { position: static !important; float: none !important; }
+
+/* responsive: stack lists on narrow screens */
+@media (max-width: 980px){
+  .lists-inner { flex-direction: column !important; }
+  .module-card { margin: 20px 14px !important; max-width: calc(100% - 28px) !important; }
+  .lists-column { margin: 12px 14px 36px !important; max-width: calc(100% - 28px) !important; }
+}
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -12,96 +63,241 @@
     <div id="userInfo" style="color:#fff; margin-left:auto; padding-right:18px;"></div>
   </header>
 
-  <main style="max-width:900px; margin:40px auto;">
-    <section class="module-card" style="padding:36px;">
-      <h2>Request Auditorium Booking</h2>
-      <p>Faculty only — requests will be <strong>Pending</strong> until an admin approves.</p>
+  <div class="page-wrap">
+    <!-- NOTE: .card is single-column (form above, lists below); CSS controls stacking -->
+    <div class="card">
 
-      <div style="margin-top:18px;">
-        <label>Event name</label>
-        <input id="eventName" placeholder="e.g. Guest Lecture" />
-      </div>
+      <!-- LEFT (visually top): Request form (module-card centered) -->
+      <section class="module-card" aria-labelledby="request-title">
+        <div class="title-col" id="request-title">Request<br/>Auditorium<br/>Booking</div>
+        <div class="note">Faculty only — requests will be <strong>Pending</strong> until an admin approves.</div>
 
-      <div style="margin-top:12px;">
-        <label>Date</label>
-        <input id="evDate" type="date" />
-      </div>
+        <div class="form-col" style="margin-top:12px;">
+          <div class="input-block">
+            <label for="eventName">Event name</label>
+            <input id="eventName" name="event_name" type="text" placeholder="e.g. Guest Lecture" />
+          </div>
 
-      <div style="display:flex; gap:12px; margin-top:12px;">
-        <div style="flex:1;">
-          <label>Start time</label>
-          <input id="startTime" type="time" />
+          <div class="input-block">
+            <label for="evDate">Date</label>
+            <input id="evDate" name="date" type="date" />
+          </div>
+
+          <div style="display:flex; gap:10px; width:100%;">
+            <div style="flex:1;">
+              <label for="startTime">Start time</label>
+              <input id="startTime" name="start_time" type="time" class="input-small" />
+            </div>
+            <div style="flex:1;">
+              <label for="endTime">End time</label>
+              <input id="endTime" name="end_time" type="time" class="input-small" />
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; align-items:center; margin-top:12px; width:100%;">
+            <button id="requestBtn" class="btn">Request Booking</button>
+            <div id="msg" class="msg" aria-live="polite"></div>
+          </div>
         </div>
-        <div style="flex:1;">
-          <label>End time</label>
-          <input id="endTime" type="time" />
+      </section>
+
+      <!-- RIGHT (visually below): Lists column (centered under the form) -->
+      <div class="lists-column" role="region" aria-label="Your bookings">
+        <!-- controls -->
+        <div class="controls" style="justify-content:flex-end;">
+          <select id="filterStatus" class="select" style="min-width:140px;">
+            <option value="">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <button id="refreshBtn" class="btn">Refresh</button>
+        </div>
+
+        <!-- lists-inner holds two panels side-by-side on wide screens -->
+        <div class="lists-inner">
+          <div class="section pending" aria-labelledby="pending-title">
+            <h3 id="pending-title">Pending</h3>
+            <div id="pendingList" class="list">
+              <div style="color:#6b7780">Loading pending requests...</div>
+            </div>
+          </div>
+
+          <div class="section approved" aria-labelledby="approved-title">
+            <h3 id="approved-title">Approved</h3>
+            <div id="approvedList" class="list">
+              <div style="color:#6b7780">Loading approved bookings...</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style="margin-top:18px;">
-        <button id="requestBtn" class="btn">Request Booking</button>
-      </div>
+    </div> <!-- .card -->
+  </div> <!-- .page-wrap -->
 
-      <p id="msg" class="msg" style="color:#0b3a66; margin-top:12px;"></p>
-    </section>
-  </main>
+<script>
+  const BACKEND_BASE = 'http://127.0.0.1:5000';
 
-  <script>
-    const BACKEND_BASE = 'http://127.0.0.1:5000'; // change if backend runs elsewhere
+  (function(){
+    const role = (localStorage.getItem('role')||'').toLowerCase();
+    const user_id = localStorage.getItem('user_id');
+    const name = localStorage.getItem('user_name') || '';
+    const info = document.getElementById('userInfo');
+    if(info) info.textContent = name + (role ? (' ('+role+')') : '');
 
-    (function(){
-      const role = (localStorage.getItem('role')||'').toLowerCase();
-      const name = localStorage.getItem('user_name') || '';
-      const userInfo = document.getElementById('userInfo');
-      if(userInfo) userInfo.textContent = name + (role ? (' ('+role+')') : '');
-      if(!['faculty','admin'].includes(role)){
-        document.getElementById('msg').textContent = 'Only faculty (or admin) may request bookings.';
-        document.getElementById('requestBtn').disabled = true;
+    if(!['faculty','admin'].includes(role)){
+      document.getElementById('msg').textContent = 'Only faculty (or admin) may request bookings.';
+      document.getElementById('requestBtn').disabled = true;
+    }
+
+    const pendingList = document.getElementById('pendingList');
+    const approvedList = document.getElementById('approvedList');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const filterStatus = document.getElementById('filterStatus');
+    const msgEl = document.getElementById('msg');
+
+    document.getElementById('requestBtn').addEventListener('click', async () => {
+      msgEl.style.color = '#0b3a66';
+      const event_name = document.getElementById('eventName').value.trim();
+      const date = document.getElementById('evDate').value;
+      const start_time = document.getElementById('startTime').value;
+      const end_time = document.getElementById('endTime').value;
+
+      if(!event_name || !date || !start_time || !end_time){
+        msgEl.style.color = '#b00020';
+        msgEl.textContent = 'Please fill all fields.';
         return;
       }
 
-      document.getElementById('requestBtn').addEventListener('click', async () => {
-        const event_name = document.getElementById('eventName').value.trim();
-        const date = document.getElementById('evDate').value;
-        const start_time = document.getElementById('startTime').value;
-        const end_time = document.getElementById('endTime').value;
-        const user_id = localStorage.getItem('user_id');
-
-        const msg = document.getElementById('msg');
-        msg.style.color = '#0b3a66';
-
-        if(!event_name || !date || !start_time || !end_time){
-          msg.textContent = 'Please fill all fields.';
-          return;
+      try {
+        const res = await fetch(BACKEND_BASE + '/book_auditorium', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ user_id, event_name, date, start_time, end_time })
+        });
+        const j = await res.json();
+        if(res.ok){
+          msgEl.style.color = 'green';
+          msgEl.textContent = j.message || 'Requested. Pending approval.';
+          document.getElementById('eventName').value='';
+          document.getElementById('evDate').value='';
+          document.getElementById('startTime').value='';
+          document.getElementById('endTime').value='';
+          loadPending(); loadApproved();
+        } else {
+          msgEl.style.color = '#b00020';
+          msgEl.textContent = j.error || j.message || `Server: ${res.status}`;
         }
+      } catch (err){
+        console.error(err);
+        msgEl.style.color = '#b00020';
+        msgEl.textContent = 'Unable to send request. Check backend.';
+      }
+    });
 
-        const payload = { user_id, event_name, date, start_time, end_time };
+    function renderPendingItem(r){
+      const en = escapeHtml(r.event_name || 'Event');
+      const date = escapeHtml(r.date || '');
+      const st = escapeHtml(r.start_time || '');
+      const et = escapeHtml(r.end_time || '');
+      const id = r.id || r.booking_id || '';
+      return `
+        <div class="booking-item">
+          <div style="font-weight:700">${en}</div>
+          <div class="meta">• ${date} ${st} - ${et}</div>
+          <div style="margin-top:8px;">
+            <button class="action-btn cancelBtn" data-id="${id}" style="margin-right:8px;">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
 
-        try {
-          const res = await fetch(BACKEND_BASE + '/book_auditorium', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify(payload)
-          });
-          const j = await res.json();
-          if(res.ok){
-            msg.style.color = 'green';
-            msg.textContent = j.message || 'Requested. Pending approval.';
-            document.getElementById('eventName').value = '';
-            document.getElementById('evDate').value = '';
-            document.getElementById('startTime').value = '';
-            document.getElementById('endTime').value = '';
-          } else {
-            msg.style.color = '#b00020';
-            msg.textContent = j.error || j.message || `Server: ${res.status}`;
-          }
-        } catch (err){
-          console.error(err);
-          msg.style.color = '#b00020';
-          msg.textContent = 'Unable to send request. Check backend.';
+    function renderApprovedItem(r){
+      const en = escapeHtml(r.event_name || 'Event');
+      const date = escapeHtml(r.date || '');
+      const st = escapeHtml(r.start_time || '');
+      const et = escapeHtml(r.end_time || '');
+      return `
+        <div class="booking-item">
+          <div style="font-weight:700">${en}</div>
+          <div class="meta">• ${date} ${st} - ${et}</div>
+          <div style="margin-top:8px;color:#073147;font-weight:700">Status: Approved</div>
+        </div>
+      `;
+    }
+
+    async function loadPending(){
+      pendingList.innerHTML = '<div style="color:#6b7780">Loading pending requests...</div>';
+      try {
+        const params = new URLSearchParams();
+        params.set('role','faculty');
+        if(user_id) params.set('user_id', user_id);
+        params.set('status','Pending');
+        const res = await fetch(BACKEND_BASE + '/get_auditorium_bookings?' + params.toString());
+        if(!res.ok){ pendingList.innerHTML = `<div style="color:#b00020">Server: ${res.status}</div>`; return; }
+        const rows = await res.json();
+        if(!rows || rows.length===0){ pendingList.innerHTML = '<div style="color:#6b7780">No pending requests</div>'; return; }
+        pendingList.innerHTML = rows.map(r => renderPendingItem(r)).join('');
+        document.querySelectorAll('.cancelBtn').forEach(b => b.addEventListener('click', onCancel));
+      } catch (err){
+        console.error(err);
+        pendingList.innerHTML = '<div style="color:#b00020">Unable to load pending (see console)</div>';
+      }
+    }
+
+    async function loadApproved(){
+      approvedList.innerHTML = '<div style="color:#6b7780">Loading approved bookings...</div>';
+      try {
+        const params = new URLSearchParams();
+        params.set('role', role === 'faculty' ? 'faculty' : 'student');
+        if(role === 'faculty' && user_id) params.set('user_id', user_id);
+        params.set('status','Approved');
+        const res = await fetch(BACKEND_BASE + '/get_auditorium_bookings?' + params.toString());
+        if(!res.ok){ approvedList.innerHTML = `<div style="color:#b00020">Server: ${res.status}</div>`; return; }
+        const rows = await res.json();
+        if(!rows || rows.length===0){ approvedList.innerHTML = '<div style="color:#6b7780">No approved bookings</div>'; return; }
+        approvedList.innerHTML = rows.map(r => renderApprovedItem(r)).join('');
+      } catch (err){
+        console.error(err);
+        approvedList.innerHTML = '<div style="color:#b00020">Unable to load approved (see console)</div>';
+      }
+    }
+
+    async function onCancel(e){
+      const id = e.currentTarget.dataset.id;
+      if(!confirm('Cancel this pending request?')) return;
+      try {
+        const res = await fetch(BACKEND_BASE + '/update_auditorium_booking_status', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ booking_id: id, status: 'Rejected' })
+        });
+        const j = await res.json();
+        if(res.ok){
+          loadPending(); loadApproved();
+        } else {
+          alert(j.error || j.message || `Server ${res.status}`);
         }
-      });
-    })();
-  </script>
+      } catch (err){
+        console.error(err);
+        alert('Unable to cancel (see console).');
+      }
+    }
+
+    refreshBtn.addEventListener('click', () => { loadPending(); loadApproved(); });
+    filterStatus.addEventListener('change', () => {
+      const s = filterStatus.value;
+      if(s === 'Pending'){ loadPending(); }
+      else if(s === 'Approved'){ loadApproved(); }
+      else { loadPending(); loadApproved(); }
+    });
+
+    // initial load
+    loadPending();
+    loadApproved();
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+  })();
+</script>
 </body>
 </html>

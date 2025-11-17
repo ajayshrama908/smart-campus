@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin — Ground Requests</title>
+
+  <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/ground_booking_view.css">
+  <style>
+    .two-sections { display:flex; gap:18px; align-items:flex-start; }
+    .section { background:#fff; border-radius:10px; padding:14px; box-shadow:0 8px 20px rgba(0,0,0,0.06); color:#073147; }
+    .section h3 { margin:0 0 8px 0; font-size:18px; color:#073245; }
+    .section .list { display:flex; flex-direction:column; gap:12px; max-height:380px; overflow:auto; padding-right:6px; }
+    .small-muted { color:#6b7780; font-size:14px; margin-top:6px; }
+    .action-btn { background:#12c1b2; color:#002b2a; padding:8px 10px; border-radius:8px; border:none; font-weight:700; cursor:pointer; }
+    .secondary-btn { background:#eef3f3; color:#073147; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
+    .controls { display:flex; gap:10px; align-items:center; justify-content:flex-start; margin-bottom:10px; }
+    @media (max-width:980px){ .two-sections{flex-direction:column;} .section{width:100%} }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div style="font-weight:700;font-size:1.2rem">Smart Campus Companion</div>
+    <div id="userInfo" style="color:#fff; margin-left:auto; padding-right:18px;"></div>
+  </header>
+
+  <main class="page-wrap">
+    <div class="card" style="grid-template-columns:1fr;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:16px;">
+        <div>
+          <div class="title">Pending Ground Requests</div>
+          <div class="note">Admin: approve or reject pending requests. Approved requests are listed to the right.</div>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button id="refreshBtn" class="btn">Refresh</button>
+        </div>
+      </div>
+
+      <div style="margin-top:18px;" class="two-sections">
+        <!-- Pending -->
+        <div class="section" style="flex:1;">
+          <h3>Pending</h3>
+          <div id="pendingList" class="list">
+            <div style="color:#6b7780">Loading pending requests...</div>
+          </div>
+        </div>
+
+        <!-- Approved -->
+        <div class="section" style="width:360px;">
+          <h3>Approved</h3>
+          <div id="approvedList" class="list">
+            <div style="color:#6b7780">Loading approved bookings...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../static/js/ground_admin_view.js"></script>
+</body>
+</html>

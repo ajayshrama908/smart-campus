@@ -87,6 +87,7 @@
 <body>
   <header class="topbar">
     <div class="brand">Smart Campus Companion</div>
+   
     <div class="nav-actions">
       <div id="userDisplay" style="font-weight:600"></div>
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -94,7 +95,8 @@
   </header>
 
   <main class="container">
-    <h2>Welcome, Student 👋</h2>
+   <!-- <h2>Welcome, Student 👋</h2>-->
+    <h2 id="welcomeMessage">Welcome 👋</h2>
     <p class="lead">Select a module to continue:</p>
 
     <div class="modules">
@@ -157,11 +159,18 @@
       const role = localStorage.getItem('role') || '';
       const el = document.getElementById('userDisplay');
       if (el) el.textContent = (name ? name : 'User') + (role ? (' (' + role + ')') : '');
+
+      const welcomeEl = document.getElementById('welcomeMessage');
+      if (welcomeEl && name) {
+      welcomeEl.textContent = `Welcome, ${name} 👋`;
+    }
     })();
 
     // navigation functions (update targets if your filenames differ)
     function openGround(){ window.location.href = '../ground_booking/ground_booking.html'; }
-    function openAuditorium(){ window.location.href = '../auditorium_booking/auditorium_booking_view.html'; }
+   //function openAuditorium(){ window.location.href = '../auditorium_booking/auditorium_booking_view.html'; }
+    function openAuditorium(){ window.location.href = '../auditorium_booking/audi.html'; }
+
     function openFacultyAvailability(){ window.location.href = '../faculty_availability/faculty_availability.html'; }
     //function openLostFound(){ window.location.href = '../lost_found/lost_found_view.html';
     function openLostFound(){ window.location.href = '../lost_found/lost_found.html'; }

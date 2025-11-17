@@ -83,11 +83,20 @@
 <body>
 
 <!-- TOP NAVIGATION BAR -->
-<nav class="nav">
-  <a href="index.html">Home</a>
-  <a href="login.html">Login</a>
-  <a href="about.html">About</a>
-</nav>
+ <nav class="nav">
+    <div class="container">
+      <!--<div class="brand">🏫 Smart Campus</div> -->
+       <div class="brand" style="display:flex;align-items:center;gap:10px;">
+  <img src="assets/sm4.png" alt="Smart Campus Logo" style="height:36px;border-radius:6px;">
+  <span style="color:#fff;font-weight:700;font-size:18px;">Smart Campus</span>
+</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a href="about.html">About</a>
+      </div>
+    </div>
+  </nav>
 
 <div class="wrapper">
 
@@ -116,7 +125,7 @@
   <div class="card">
     <h3>3. Ground Booking System</h3>
     <p>
-      Students and faculty can request booking of sports grounds.
+      Students can view and faculty can request booking of sports grounds.
       The system checks for time conflicts and supports admin approval or rejection.
     </p>
   </div>
